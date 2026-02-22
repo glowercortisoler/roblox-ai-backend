@@ -2,16 +2,11 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-
 app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-
-if (!DEEPSEEK_API_KEY) {
-    console.error("❌ DEEPSEEK_API_KEY not set in environment variables");
-}
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 app.post("/chat", async (req, res) => {
     try {
@@ -21,14 +16,14 @@ app.post("/chat", async (req, res) => {
             return res.status(400).json({ error: "Messages are required" });
         }
 
-        const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
+                "Authorization": Bearer ${GROQ_API_KEY}
             },
             body: JSON.stringify({
-                model: "deepseek-chat",
+                model: "llama3-8b-8192",
                 messages: messages
             })
         });
@@ -36,8 +31,8 @@ app.post("/chat", async (req, res) => {
         const data = await response.json();
 
         if (!data.choices || !data.choices[0]) {
-            console.error("DeepSeek error:", data);
-            return res.status(500).json({ error: "Invalid response from DeepSeek" });
+            console.error("Groq error:", data);
+            return res.status(500).json({ error: "Invalid response from Groq" });
         }
 
         res.json({
