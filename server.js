@@ -1,49 +1,59 @@
 import express from "express";
-import axios from "axios";
+import cors from "cors";
 
 const app = express();
-app.use(express.json());
 
-const DEEPSEEK_API_KEY = "sk-7ca0429affac49ec81b99f40567e5143";
+app.use(express.json());
+app.use(cors());
+
+const PORT = process.env.PORT || 3000;
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+
+if (!DEEPSEEK_API_KEY) {
+    console.error("❌ DEEPSEEK_API_KEY not set in environment variables");
+}
 
 app.post("/chat", async (req, res) => {
     try {
-        const { player, message } = req.body;
+        const { messages } = req.body;
 
-        const response = await axios.post(
-            "https://api.deepseek.com/v1/chat/completions",
-            {
-                model: "deepseek-chat",
-                messages: [
-                    {
-                        role: "system",
-                        content: "Ты NPC в Roblox игре. Отвечай кратко и естественно."
-                    },
-                    {
-                        role: "user",
-                        content: `${player}: ${message}`
-                    }
-                ],
-                temperature: 0.8
+        if (!messages) {
+            return res.status(400).json({ error: "Messages are required" });
+        }
+
+        const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
             },
-            {
-                headers: {
-                    "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            }
-        );
+            body: JSON.stringify({
+                model: "deepseek-chat",
+                messages: messages
+            })
+        });
 
-        const reply = response.data.choices[0].message.content;
+        const data = await response.json();
 
-        res.send(reply);
+        if (!data.choices || !data.choices[0]) {
+            console.error("DeepSeek error:", data);
+            return res.status(500).json({ error: "Invalid response from DeepSeek" });
+        }
+
+        res.json({
+            reply: data.choices[0].message.content
+        });
 
     } catch (error) {
-        console.error(error.response?.data || error.message);
-        res.status(500).send("Ошибка нейросети");
+        console.error("Server error:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
-app.listen(3000, () => {
-    console.log("Backend запущен на 3000");
+app.get("/", (req, res) => {
+    res.send("Backend is running");
+});
+
+app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
 });
