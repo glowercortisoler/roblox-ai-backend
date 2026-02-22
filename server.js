@@ -20,7 +20,7 @@ app.post("/chat", async (req, res) => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${GROQ_API_KEY}`
+                "Authorization": Bearer ${GROQ_API_KEY}
             },
             body: JSON.stringify({
                 model: "llama3-8b-8192",
@@ -52,4 +52,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 });
-
