@@ -8,23 +8,45 @@ app.use(cors());
 const PORT = process.env.PORT || 3000;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
+if (!GROQ_API_KEY) {
+    console.error("GROQ_API_KEY is not set in environment variables");
+}
+
 app.post("/chat", async (req, res) => {
     try {
-        const { messages } = req.body;
+        const { message, worldState } = req.body;
 
-        if (!messages) {
-            return res.status(400).json({ error: "Messages are required" });
+        if (!message || !worldState) {
+            return res.status(400).json({ error: "message and worldState are required" });
         }
+
+        const prompt = `
+Человек: ${message}
+
+Текущее состояние мира (JSON):
+${JSON.stringify(worldState, null, 2)}
+
+Отвечай как NPC. Учитывай состояние мира при формировании ответа.
+`;
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${GROQ_API_KEY}`
+                "Authorization": Bearer ${GROQ_API_KEY}
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: messages
+                messages: [
+                    {
+                        role: "system",
+                        content: "Ты NPC в Roblox. Отвечай естественно, как персонаж в игре."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ]
             })
         });
 
@@ -50,7 +72,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
-
-
