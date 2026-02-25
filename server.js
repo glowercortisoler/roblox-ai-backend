@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const PORT = process.env.PORT  3000;
+const PORT = process.env.PORT || 3000;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 app.post("/chat", async (req, res) => {
@@ -52,3 +52,4 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(✅ Server running on port ${PORT});
 });
+
