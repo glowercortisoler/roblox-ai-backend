@@ -33,7 +33,7 @@ ${JSON.stringify(worldState, null, 2)}
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": Bearer ${GROQ_API_KEY}
+                "Authorization": Bearer `${GROQ_API_KEY}`
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
@@ -74,3 +74,4 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
