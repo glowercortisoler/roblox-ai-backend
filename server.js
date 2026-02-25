@@ -30,7 +30,7 @@ app.post("/chat", async (req, res) => {
 
         const data = await response.json();
 
-        if (!data.choices  !data.choices[0]) {
+        if (!data.choices || !data.choices[0]) {
             console.error("Groq error:", data);
             return res.status(500).json({ error: "Invalid response from Groq" });
         }
@@ -52,4 +52,5 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
     console.log(✅ Server running on port ${PORT});
 });
+
 
